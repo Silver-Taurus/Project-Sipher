@@ -6,7 +6,7 @@ class Cipher():
     def __init__(self):
         self._text = ''
 
-    def caesar_sub_routine(string, shift) :
+    def __caesar_sub_routine(string, shift) :
         final_string = ''
 
         for i in range(len(string)) :
@@ -15,7 +15,7 @@ class Cipher():
                 final_string += chr((ord(char) + shift-65) % 26 + 65)
             else :
                 final_string += chr((ord(char) + shift-97) % 26 + 97)
-        return final_string
+        #return final_string
         pass
 
     def __reverse_cipher(self, mode):
@@ -31,9 +31,9 @@ class Cipher():
         shift = int(input("Enter the shift : "))
 
         if mode == 'encode' :
-            print('The encoded text is : {}'.format(caesar_sub_routine(self._text, shift)))
+            print('The encoded text is : {}'.format(__caesar_sub_routine(self._text, shift)))
         else :
-            print('The decoded Cipher is : {}'.format(caesar_sub_routine(self._text, 26-shift)))
+            print('The decoded Cipher is : {}'.format(__caesar_sub_routine(self._text, 26-shift)))
 
         pass
 
