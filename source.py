@@ -31,9 +31,9 @@ class Cipher():
         shift = int(input("Enter the shift : "))
 
         if mode == 'encode' :
-            print('The encoded text is : {}'.format(__caesar_sub_routine(self._text, shift)))
+            print('The encoded text is : {}'.format(self.__caesar_sub_routine(self._text, shift)))
         else :
-            print('The decoded Cipher is : {}'.format(__caesar_sub_routine(self._text, 26-shift)))
+            print('The decoded Cipher is : {}'.format(self.__caesar_sub_routine(self._text, 26-shift)))
 
         pass
 
