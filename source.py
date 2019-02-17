@@ -5,7 +5,7 @@ from math import ceil
 
 class CipherSubRoutine(ABC):
     ''' Class for supporting the main cipher class by providing the sub-routines needed'''
-    
+
     def __init__(self, text, length):
         self._text = text
         self._length = length
@@ -25,7 +25,7 @@ class CipherSubRoutine(ABC):
 
     @abstractmethod
     def _transposition_sub_routine(self, key, mode):
-        ''' Transposition Cipher sub-routine for crypting text '''  
+        ''' Transposition Cipher sub-routine for crypting text '''
         input = self._text.lower()
         output = []
         if mode == 'encode':
@@ -33,7 +33,7 @@ class CipherSubRoutine(ABC):
             for i in range(key):
                 for j in range(i, self._length, key):
                     output.append(input[j])
-            return ''.join(output)   
+            return ''.join(output)
         else:
             # Col-Wise reading and Row-Wise Filling
             cols = ceil(self._length/key)
@@ -42,10 +42,24 @@ class CipherSubRoutine(ABC):
                     output.append(self._text[j])
             return ''.join(output)
 
+    @abstractmethod
+    def _affine_sub_routine(self, mode):
+        a,b = 17,20
+        input = self._text.lower()
+        output = []
+        if mode == 'encode' :
+            # Applying a simple mathematical function to encrypt text using their unicode
+            for i in range(self._length):
+                if self._text[i] != ' ' :
+                    output.append(chr(((((a * (ord(self._text[i]) - ord('a')) ) + b) % 26) + ord('a'))))
+                else :
+                    output.append(' ')
+
+            return ''.join(output)
+    
 
 class Cipher(CipherSubRoutine):
     ''' Class for performing the cipher methods on a given text '''
-
     # Cipher Constructor for taking input of text and passing it to CipherSubRoutine Constructor.
     def __init__(self):
         self.__ciphers = {'Reverse Cipher': self.__reverse_cipher, \
@@ -55,10 +69,10 @@ class Cipher(CipherSubRoutine):
             'One Time Pad Cipher': self.__otp_cipher, \
             'RSA Cipher': self.__rsa_cipher
             }
-        self._text = input('\nEnter the text: ') 
+        self._text = input('\nEnter the text: ')
         self._length = len(self._text)
         super().__init__(self._text, self._length)
-    
+
     # Abstract Cipher Sub-Routines
     def _caesar_sub_routine(self, key):
         ''' Calling abstract base class sub-routine '''
@@ -68,11 +82,15 @@ class Cipher(CipherSubRoutine):
         ''' Calling abstract base class sub-routine '''
         return super()._transposition_sub_routine(key, mode)
 
+    def _affine_sub_routine(self, mode):
+        ''' Calling abstract base class sub-routine '''
+        return super()._affine_sub_routine(mode)
+
     # Primary Cipher Routines
     def __reverse_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from Reverse Cipher '''
         return self._text.lower()[::-1]
-        
+
     def __caesar_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from Caesar Cipher '''
         key = int(input("Enter the key: "))
@@ -85,13 +103,18 @@ class Cipher(CipherSubRoutine):
         ''' Cipher Routine to encode into or decode form Transposition Cipher '''
         while(True):
             key = int(input('Enter the key: '))
-            if (key is not 1) and (key < self._length): 
+            if (key is not 1) and (key < self._length):
                 break
             else:
-                print('Key cannot be < 2 or >= the length of entered text!!!\n') 
+                print('Key cannot be < 2 or >= the length of entered text!!!\n')
         return self._transposition_sub_routine(key, mode)
 
     def __affine_cipher(self, mode):
+        ''' Cipher Routineto encode into or decode from Affine Cipher '''
+        if mode == 'encode':
+            return self._affine_sub_routine(mode)
+        else :
+            return self._affine_sub_routine(mode)
         pass
 
     def __vigenere_cipher(self, mode):
@@ -104,14 +127,14 @@ class Cipher(CipherSubRoutine):
         pass
 
     def __primary_cipher_routine(self, mode):
-        ''' primary cipher routine for performing the cipher algorithm with the defined mode leagally '''         
-        
+        ''' primary cipher routine for performing the cipher algorithm with the defined mode leagally '''
+
         cipher_keys = {}
         print('\n\nCipher list:')
         for num, func_name in enumerate(self.__ciphers.keys(), 1):
             print('{}. {}'.format(num, func_name))
             cipher_keys['{}'.format(num)] = '{}'.format(func_name)
-        
+
         cipher = None
         while(True):
             cipher = input('\nEnter Your Choice: ')
@@ -141,7 +164,7 @@ class Cipher(CipherSubRoutine):
 def main():
     ''' Main Driver Program '''
 
-    print('''             
+    print('''
      _/_/_/                        _/                        _/
    _/    _/  _/  _/_/    _/_/          _/_/      _/_/_/  _/_/_/_/
   _/_/_/    _/_/      _/    _/  _/  _/_/_/_/  _/          _/
@@ -155,7 +178,7 @@ _/        _/          _/_/    _/    _/_/_/    _/_/_/      _/_/
                _/  _/  _/    _/  _/    _/  _/        _/
         _/_/_/    _/  _/_/_/    _/    _/    _/_/_/  _/
                      _/
-                    _/    
+                    _/
     ''' )
 
     options = ['1', '2', '3', '4']
@@ -168,7 +191,7 @@ _/        _/          _/_/    _/    _/_/_/    _/_/_/      _/_/
             \nEnter Your Choice: ''')
 
         if choice not in options:
-            print('Invalid Choice!!!')
+            print('Please enter a valid choice!')
             continue
         elif choice == '4':
             break
