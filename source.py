@@ -45,62 +45,31 @@ class CipherSubRoutine(ABC):
             return ''.join(output)
 
     @abstractmethod
-    def _affine_sub_routine(self, mode):
-        a,b = 0,0
+    def _affine_sub_routine(self, key, mode):
         output = []
 
-        if mode == 'encode' :
-
-            choice = input("Enter key Automatically/Manually [A/m]: ")
-
-            if choice == 'A' or choice == 'a' or choice == '' :
-                while (True) :
-                    i = randint(1,pow(10,5))
-                    if gcd(i, 26) == 1 :
-                        a = i
-                        break
-                b = randint(1,100)
-
-            elif choice == 'm' or choice == 'M' :
-                n = int(input("How many keys to choose 'a' from? : "))
-                for i in range(1,n) :
-                    if gcd(i,26) == 1 :
-                        print(i, end = ' ')
-                a = int(input('\nEnter a : '))
-                b = int(input('Enter b : '))
-
-            else :
-                print("Abort.")
-                exit()
-
+        if mode == 'encode':
             for ch in self._text:
-                if ch != ' ' :
-                    output.append(chr(((((a * (ord(ch) - ord('a')) ) + b) % 26) + ord('a'))))
-                else :
+                if ch != ' ':
+                    output.append(chr(((((key[0] * (ord(ch) - ord('a'))) + key[1]) % 26) + ord('a'))))
+                else:
                     output.append(' ')
             
-
-        if mode == 'decode' :
-            a = int(input('Enter a : '))
-            b = int(input('Enter b : '))
+        elif mode == 'decode':
             a_inv = 0 
-            
-            for i in range(1,26) : 
-                if ((a*i) % 26) == 1 :
+            for i in range(1, 26): 
+                if ((key[0]*i) % 26) == 1 :
                     a_inv = i
                     break
-
             print(self._text)
             print(a_inv)
             print(ord('a'))
             for ch in self._text:
                 if ch != ' ' :
-                    output.append(chr( a_inv *((ord(ch) + ord('a') - b ) % 26) + ord('a')))
+                    output.append(chr((((a_inv * (ord(ch) + ord('a'))) - key[1]) % 26) + ord('a')))
                 else :
                     output.append(' ')
-        
-        
-        print(f'\na = {a}\nb = {b}')
+
         return ''.join(output)
             
 
@@ -131,9 +100,9 @@ class Cipher(CipherSubRoutine):
         ''' Calling abstract base class sub-routine '''
         return super()._transposition_sub_routine(key, mode)
 
-    def _affine_sub_routine(self, mode):
+    def _affine_sub_routine(self, key, mode):
         ''' Calling abstract base class sub-routine '''
-        return super()._affine_sub_routine(mode)
+        return super()._affine_sub_routine(key, mode)
 
     # Primary Cipher Routines
     def __reverse_cipher(self, mode):
@@ -149,17 +118,76 @@ class Cipher(CipherSubRoutine):
 
     def __transposition_cipher(self, mode):
         ''' Cipher Routine to encode into or decode form Transposition Cipher '''
-        while(True):
-            key = int(input('Enter the key: '))
-            if (key is not 1) and (key < self._length):
-                break
-            else:
+        while True:
+            try:
+                key = int(input('Enter the key: '))
+                if (key == 1) or (key < self._length):
+                    assert ValueError
+            except ValueError:
                 print('Key cannot be < 2 or >= the length of entered text!!!\n')
+            else:
+                break
         return self._transposition_sub_routine(key, mode)
 
     def __affine_cipher(self, mode):
-        ''' Cipher Routineto encode into or decode from Affine Cipher '''
-        return self._affine_sub_routine(mode)
+        ''' Cipher Routine to encode into or decode from Affine Cipher '''
+        key_a = key_b = 0
+
+        if mode == 'encode':
+            while True:
+                choice = input("Enter key Automatically/Manually [A/m]: ")
+
+                if choice == 'A' or choice == 'a' or choice == '':
+                    while True:
+                        key_a = randint(1, 10**5)
+                        if gcd(key_a, 26) == 1 :
+                            break
+                    key_b = randint(1, 10**5)
+                    break
+                
+                elif choice == 'm' or choice == 'M':
+                    while True:
+                        try:
+                            n = int(input('Range 1 to n from which a valid key is choosen\nEnter n (should be greater than 1): '))
+                            if n < 2:
+                                assert ValueError
+                            keys_a = []
+                            for i in range(1, n):
+                                if gcd(i,26) == 1 :
+                                    print(i, end = ' ')
+                                    keys_a.append(i)
+                            key_a = int(input('\nEnter key-a: '))
+                            if key_a not in keys_a:
+                                assert ValueError
+                            key_b = int(input('Enter key-b: '))
+                            if key_b < 0:
+                                assert ValueError
+                        except ValueError:
+                            print('\nEntered value is invalid!!!')
+                        else:
+                            break
+                    break
+
+                else:
+                    print('Invalid Choice!!!')
+        
+            print('\nkey-a = {}\nkey-b = {}'.format(key_a, key_b))
+        
+        else:
+            try:
+                key_a = int(input('\nEnter key-a: '))
+                if key_a < 2 or gcd(key_a, 26) != 1:
+                    assert ValueError
+        
+                key_b = int(input('Enter key-b: '))
+                if key_b < 0:
+                    assert ValueError
+
+            except ValueError:
+                print('Entered key is invalid!!! Aborting...')
+                exit()
+    
+        return self._affine_sub_routine((key_a, key_b), mode)
 
 
     def __vigenere_cipher(self, mode):
