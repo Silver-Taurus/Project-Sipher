@@ -2,6 +2,8 @@
 
 from abc import ABC, abstractmethod
 from math import ceil
+from math import gcd
+from random import randint
 
 class CipherSubRoutine(ABC):
     ''' Class for supporting the main cipher class by providing the sub-routines needed'''
@@ -44,18 +46,65 @@ class CipherSubRoutine(ABC):
 
     @abstractmethod
     def _affine_sub_routine(self, mode):
-        a,b = 17,20
-        input = self._text.lower()
+        a,b = 0,0
         output = []
+
         if mode == 'encode' :
-            # Applying a simple mathematical function to encrypt text using their unicode
-            for i in range(self._length):
-                if self._text[i] != ' ' :
-                    output.append(chr(((((a * (ord(self._text[i]) - ord('a')) ) + b) % 26) + ord('a'))))
+
+            choice = input("Enter key Automatically/Manually [A/m]: ")
+
+            if choice == 'A' or choice == 'a' or choice == '' :
+                while (True) :
+                    i = randint(1,pow(10,5))
+                    if gcd(i, 26) == 1 :
+                        a = i
+                        break
+                b = randint(1,100)
+
+            elif choice == 'm' or choice == 'M' :
+                n = int(input("How many keys to choose 'a' from? : "))
+                for i in range(1,n) :
+                    if gcd(i,26) == 1 :
+                        print(i, end = ' ')
+                a = int(input('\nEnter a : '))
+                b = int(input('Enter b : '))
+
+            else :
+                print("Abort.")
+                exit()
+
+            for ch in self._text:
+                if ch != ' ' :
+                    output.append(chr(((((a * (ord(ch) - ord('a')) ) + b) % 26) + ord('a'))))
                 else :
                     output.append(' ')
+            
 
-            return ''.join(output)
+        if mode == 'decode' :
+            a = int(input('Enter a : '))
+            b = int(input('Enter b : '))
+            a_inv = 0 
+            
+            for i in range(1,26) : 
+                if ((a*i) % 26) == 1 :
+                    a_inv = i
+                    break
+
+            print(self._text)
+            print(a_inv)
+            print(ord('a'))
+            for ch in self._text:
+                if ch != ' ' :
+                    output.append(chr( a_inv *((ord(ch) + ord('a') - b ) % 26) + ord('a')))
+                else :
+                    output.append(' ')
+        
+        
+        print(f'\na = {a}\nb = {b}')
+        return ''.join(output)
+            
+
+            
     
 
 class Cipher(CipherSubRoutine):
@@ -93,7 +142,6 @@ class Cipher(CipherSubRoutine):
 
     def __caesar_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from Caesar Cipher '''
-        key = int(input("Enter the key: "))
         if mode == 'encode':
             return self._caesar_sub_routine(key)
         else:
@@ -111,11 +159,8 @@ class Cipher(CipherSubRoutine):
 
     def __affine_cipher(self, mode):
         ''' Cipher Routineto encode into or decode from Affine Cipher '''
-        if mode == 'encode':
-            return self._affine_sub_routine(mode)
-        else :
-            return self._affine_sub_routine(mode)
-        pass
+        return self._affine_sub_routine(mode)
+
 
     def __vigenere_cipher(self, mode):
         pass
