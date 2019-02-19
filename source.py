@@ -9,39 +9,36 @@ class CipherSubRoutine(ABC):
     ''' Class for supporting the main cipher class by providing the sub-routines needed'''
 
     def __init__(self, text, length):
-        self._text = text
-        self._length = length
+        self.__text = text
+        self.__length = length
 
     @abstractmethod
-    def _caesar_sub_routine(self, shift):
+    def _caesar_sub_routine(self, key):
         ''' Caesar Cipher sub-routine for crypting text '''
         output = ''
-        for char in self._text:
-            if char.isupper():
-                output += chr((ord(char) + shift-65) % 26 + 65)
-            elif char == ' ':
+        for char in self.__text:
+            if char == ' ':
                 output += char
             else:
-                output += chr((ord(char) + shift-97) % 26 + 97)
+                output += chr((ord(char) + key-97) % 26 + 97)
         return output
 
     @abstractmethod
     def _transposition_sub_routine(self, key, mode):
         ''' Transposition Cipher sub-routine for crypting text '''
-        input = self._text.lower()
         output = []
         if mode == 'encode':
             # Row-Wise reading and Col-Wise Filling
             for i in range(key):
-                for j in range(i, self._length, key):
-                    output.append(input[j])
+                for j in range(i, self.__length, key):
+                    output.append(self.__text[j])
             return ''.join(output)
         else:
             # Col-Wise reading and Row-Wise Filling
-            cols = ceil(self._length/key)
+            cols = ceil(self.__length/key)
             for i in range(cols):
-                for j in range(i, self._length, cols):
-                    output.append(self._text[j])
+                for j in range(i, self.__length, cols):
+                    output.append(self.__text[j])
             return ''.join(output)
 
     @abstractmethod
@@ -51,7 +48,7 @@ class CipherSubRoutine(ABC):
         if mode == 'encode':
             for ch in self._text:
                 if ch != ' ':
-                    output.append(chr(((((key[0] * (ord(ch) - ord('a'))) + key[1]) % 26) + ord('a'))))
+                    output.append(chr((((key[0] * (ord(ch) - ord('a'))) + key[1]) % 26) + ord('a')))
                 else:
                     output.append(' ')
             
@@ -66,7 +63,7 @@ class CipherSubRoutine(ABC):
             print(ord('a'))
             for ch in self._text:
                 if ch != ' ' :
-                    output.append(chr((((a_inv * (ord(ch) + ord('a'))) - key[1]) % 26) + ord('a')))
+                    output.append(chr((a_inv * (ord(ch) - ord('a') - key[1])) % 26 + ord('a')))
                 else :
                     output.append(' ')
 
@@ -111,6 +108,7 @@ class Cipher(CipherSubRoutine):
 
     def __caesar_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from Caesar Cipher '''
+        key = int(input('Enter the key:'))
         if mode == 'encode':
             return self._caesar_sub_routine(key)
         else:
@@ -217,9 +215,9 @@ class Cipher(CipherSubRoutine):
                 print('Invalid Choice!!!\n')
 
         if mode == 'encode':
-            print('\nThe encoded string is: ', self.__ciphers[cipher_keys[cipher]](mode))
+            print('\nThe encoded string is:', self.__ciphers[cipher_keys[cipher]](mode))
         else:
-            print('\nThe decoded string is: ', self.__ciphers[cipher_keys[cipher]](mode))
+            print('\nThe decoded string is:', self.__ciphers[cipher_keys[cipher]](mode))
 
     def encode(self):
         ''' Encode-Routine for Encoding the plaintext into ciphertext '''
