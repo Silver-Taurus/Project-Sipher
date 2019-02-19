@@ -106,7 +106,19 @@ class Cipher(CipherSubRoutine):
 
     def __caesar_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from Caesar Cipher '''
-        key = int(input('Enter the key:'))
+        while True:
+            try:
+                key = int(input('Enter the key:'))
+                if key < 0:
+                    assert ValueError
+                if key == 0  or key%26 == 0:
+                    assert KeyError
+            except ValueError:
+                print('Key cannot be negative!!!\n')
+            except KeyError:
+                print('Key should not be 0 or mutiple of 26!!!\n')
+            else:
+                break
         if mode == 'encode':
             return self._caesar_sub_routine(key)
         else:
@@ -204,21 +216,18 @@ class Cipher(CipherSubRoutine):
             print('{}. {}'.format(num, func_name))
             cipher_keys['{}'.format(num)] = '{}'.format(func_name)
 
-        cipher = None
+        choice = None
         while(True):
             try:
-                cipher = input('\nEnter Your Choice: ')
-                if cipher not in cipher_keys.keys():
+                choice = input('\nEnter Your Choice: ')
+                if choice not in cipher_keys.keys():
                     assert ValueError
             except ValueError:
                 print('Invalid Choice!!!\n')
             else:
                 break
 
-        if mode == 'encode':
-            print('\nThe encoded string is:', self.__ciphers[cipher_keys[cipher]](mode))
-        else:
-            print('\nThe decoded string is:', self.__ciphers[cipher_keys[cipher]](mode))
+        print('\nThe {}d string is:'.format(mode), self.__ciphers[cipher_keys[choice]](mode))
 
     def encode(self):
         ''' Encode-Routine for Encoding the plaintext into ciphertext '''
