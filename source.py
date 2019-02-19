@@ -206,11 +206,14 @@ class Cipher(CipherSubRoutine):
 
         cipher = None
         while(True):
-            cipher = input('\nEnter Your Choice: ')
-            if cipher in cipher_keys.keys():
-                break
-            else:
+            try:
+                cipher = input('\nEnter Your Choice: ')
+                if cipher not in cipher_keys.keys():
+                    assert ValueError
+            except ValueError:
                 print('Invalid Choice!!!\n')
+            else:
+                break
 
         if mode == 'encode':
             print('\nThe encoded string is:', self.__ciphers[cipher_keys[cipher]](mode))
