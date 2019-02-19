@@ -70,8 +70,6 @@ class CipherSubRoutine(ABC):
         return ''.join(output)
             
 
-            
-    
 
 class Cipher(CipherSubRoutine):
     ''' Class for performing the cipher methods on a given text '''
