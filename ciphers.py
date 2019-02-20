@@ -1,77 +1,12 @@
+#! /usr/bin/env python3
+
 ''' Project Sipher '''
 
-from abc import ABC, abstractmethod
-from math import ceil
-from math import gcd
-from random import randint
+import math
+import random
+import cipher_sub_routines
 
-class CipherSubRoutine(ABC):
-    ''' Class for supporting the main cipher class by providing the sub-routines needed'''
-
-    def __init__(self, text, length):
-        self.__text = text
-        self.__length = length
-
-    @abstractmethod
-    def _caesar_sub_routine(self, key):
-        ''' Caesar Cipher sub-routine for crypting text '''
-        output = ''
-        for char in self.__text:
-            if char == ' ':
-                output += char
-            else:
-                output += chr((ord(char) + key-97) % 26 + 97)
-        return output
-
-    @abstractmethod
-    def _transposition_sub_routine(self, key, mode):
-        ''' Transposition Cipher sub-routine for crypting text '''
-        output = []
-        if mode == 'encode':
-            # Row-Wise reading and Col-Wise Filling
-            for i in range(key):
-                for j in range(i, self.__length, key):
-                    output.append(self.__text[j])
-            return ''.join(output)
-        else:
-            # Col-Wise reading and Row-Wise Filling
-            cols = ceil(self.__length/key)
-            for i in range(cols):
-                for j in range(i, self.__length, cols):
-                    output.append(self.__text[j])
-            return ''.join(output)
-
-    @abstractmethod
-    def _affine_sub_routine(self, key, mode):
-        output = []
-
-        if mode == 'encode':
-            for ch in self._text:
-                if ch != ' ':
-                    output.append(chr((((key[0] * (ord(ch) - ord('a'))) + key[1]) % 26) + ord('a')))
-                else:
-                    output.append(' ')
-            
-        elif mode == 'decode':
-            a_inv = 0 
-            for i in range(1, 26): 
-                if ((key[0]*i) % 26) == 1 :
-                    a_inv = i
-                    break
-            print(self._text)
-            print(a_inv)
-            print(ord('a'))
-            for ch in self._text:
-                if ch != ' ' :
-                    output.append(chr((a_inv * (ord(ch) - ord('a') - key[1])) % 26 + ord('a')))
-                else :
-                    output.append(' ')
-
-        return ''.join(output)
-            
-
-
-class Cipher(CipherSubRoutine):
+class Cipher(cipher_sub_routines.CipherSubRoutine):
     ''' Class for performing the cipher methods on a given text '''
     # Cipher Constructor for taking input of text and passing it to CipherSubRoutine Constructor.
     def __init__(self):
@@ -79,36 +14,24 @@ class Cipher(CipherSubRoutine):
             'Caesar Cipher': self.__caesar_cipher, \
             'Transposition Cipher': self.__transposition_cipher, \
             'Affine Cipher': self.__affine_cipher, \
+            'Vigenere Cipher': self.__vigenere_cipher, \
             'One Time Pad Cipher': self.__otp_cipher, \
             'RSA Cipher': self.__rsa_cipher
             }
-        self._text = input('\nEnter the text: ')
-        self._length = len(self._text)
-        super().__init__(self._text, self._length)
-
-    # Abstract Cipher Sub-Routines
-    def _caesar_sub_routine(self, key):
-        ''' Calling abstract base class sub-routine '''
-        return super()._caesar_sub_routine(key)
-
-    def _transposition_sub_routine(self, key, mode):
-        ''' Calling abstract base class sub-routine '''
-        return super()._transposition_sub_routine(key, mode)
-
-    def _affine_sub_routine(self, key, mode):
-        ''' Calling abstract base class sub-routine '''
-        return super()._affine_sub_routine(key, mode)
+        self.__text = input('\nEnter the text: ').lower()
+        self.__length = len(self.__text)
+        super().__init__(self.__text, self.__length)
 
     # Primary Cipher Routines
-    def __reverse_cipher(self, mode):
+    def __reverse_cipher(self):
         ''' Cipher Routine to encode into or decode from Reverse Cipher '''
-        return self._text.lower()[::-1]
+        return self.__text[::-1]
 
     def __caesar_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from Caesar Cipher '''
         while True:
             try:
-                key = int(input('Enter the key:'))
+                key = int(input('Enter the key: '))
                 if key < 0:
                     assert ValueError
                 if key == 0  or key%26 == 0:
@@ -129,7 +52,7 @@ class Cipher(CipherSubRoutine):
         while True:
             try:
                 key = int(input('Enter the key: '))
-                if (key == 1) or (key < self._length):
+                if (key == 1) or (key < self.__length):
                     assert ValueError
             except ValueError:
                 print('Key cannot be < 2 or >= the length of entered text!!!\n')
@@ -147,21 +70,22 @@ class Cipher(CipherSubRoutine):
 
                 if choice == 'A' or choice == 'a' or choice == '':
                     while True:
-                        key_a = randint(1, 10**5)
-                        if gcd(key_a, 26) == 1 :
+                        key_a = random.randint(1, 10**5)
+                        if math.gcd(key_a, 26) == 1 :
                             break
-                    key_b = randint(1, 10**5)
+                    key_b = random.randint(1, 10**5)
                     break
                 
                 elif choice == 'm' or choice == 'M':
                     while True:
                         try:
-                            n = int(input('Range 1 to n from which a valid key is choosen\nEnter n (should be greater than 1): '))
+                            n = int(input('Range 1 to n from which a valid key is choosen\nEnter n' 
+                                '(should be greater than 1): '))
                             if n < 2:
                                 assert ValueError
                             keys_a = []
                             for i in range(1, n):
-                                if gcd(i,26) == 1 :
+                                if math.gcd(i,26) == 1 :
                                     print(i, end = ' ')
                                     keys_a.append(i)
                             key_a = int(input('\nEnter key-a: '))
@@ -182,24 +106,38 @@ class Cipher(CipherSubRoutine):
             print('\nkey-a = {}\nkey-b = {}'.format(key_a, key_b))
         
         else:
-            try:
-                key_a = int(input('\nEnter key-a: '))
-                if key_a < 2 or gcd(key_a, 26) != 1:
-                    assert ValueError
-        
-                key_b = int(input('Enter key-b: '))
-                if key_b < 0:
-                    assert ValueError
-
-            except ValueError:
-                print('Entered key is invalid!!! Aborting...')
-                exit()
+            while True:
+                try:
+                    key_a = int(input('\nEnter key-a: '))
+                    if key_a < 2 or math.gcd(key_a, 26) != 1:
+                        assert ValueError
+            
+                    key_b = int(input('Enter key-b: '))
+                    if key_b < 0:
+                        assert ValueError
+                except ValueError:
+                    print('Entered key is invalid!!!')
+                else:
+                    break
     
         return self._affine_sub_routine((key_a, key_b), mode)
 
-
     def __vigenere_cipher(self, mode):
-        pass
+        ''' Cipher Routine to encode into or decode from Vigenere Cipher '''
+        while True:
+            try:
+                key = input('Enter the key: ')
+                if any(char.isdigit() for char in key):
+                    raise KeyError
+                key = list(key)
+                if self.__length != len(key):
+                    for i in range(self.__length - len(key)):
+                        key.append(key[i % len(key)])
+            except KeyError:
+                print('Entered key is invalid... Key should only contain Alphabet...\n')
+            else:
+                break
+        return self._vigenere_sub_routine(key, mode)
 
     def __otp_cipher(self, mode):
         pass
@@ -208,26 +146,22 @@ class Cipher(CipherSubRoutine):
         pass
 
     def __primary_cipher_routine(self, mode):
-        ''' primary cipher routine for performing the cipher algorithm with the defined mode leagally '''
-
+        ''' primary cipher routine for applying the cipher algorithm with the defined mode leagally '''
         cipher_keys = {}
         print('\n\nCipher list:')
         for num, func_name in enumerate(self.__ciphers.keys(), 1):
             print('{}. {}'.format(num, func_name))
             cipher_keys['{}'.format(num)] = '{}'.format(func_name)
-
         choice = None
         while(True):
             try:
                 choice = input('\nEnter Your Choice: ')
-                if choice not in cipher_keys.keys():
-                    assert ValueError
-            except ValueError:
+                print('\nThe {}d string is:'.format(mode), self.__ciphers[cipher_keys[choice]]() \
+                    if choice=='1' else self.__ciphers[cipher_keys[choice]](mode))
+            except KeyError:
                 print('Invalid Choice!!!\n')
             else:
                 break
-
-        print('\nThe {}d string is:'.format(mode), self.__ciphers[cipher_keys[choice]](mode))
 
     def encode(self):
         ''' Encode-Routine for Encoding the plaintext into ciphertext '''
@@ -240,7 +174,6 @@ class Cipher(CipherSubRoutine):
     def hack(self):
         ''' Hack-Routine for Hacking the ciphertext without key(s) into plaintext '''
         pass
-
 
 def main():
     ''' Main Driver Program '''
@@ -264,27 +197,32 @@ _/        _/          _/_/    _/    _/_/_/    _/_/_/      _/_/
 
     options = ['1', '2', '3', '4']
     while(True):
-        choice = input('''\n\nMain Menu:
-            1. Encode into ciphertext
-            2. Decode into plaintext
-            3. Hack the ciphertext
-            4. Exit
-            \nEnter Your Choice: ''')
+        try:
+            choice = input('''\n\nMain Menu:
+                1. Encode into ciphertext
+                2. Decode into plaintext
+                3. Hack the ciphertext
+                4. Exit
+                \nEnter Your Choice: ''')
 
-        if choice not in options:
-            print('Please enter a valid choice!')
+            if choice not in options:
+                print('Please enter a valid choice!')
+                continue
+            elif choice == '4':
+                exit()
+
+            print('\n(Press `Ctrl+C` to return to Main Menu)')
+
+            cipher = Cipher()
+            if choice == '1':
+                cipher.encode()
+            elif choice == '2':
+                cipher.decode()
+            else:
+                cipher.hack()
+        
+        except KeyboardInterrupt:
             continue
-        elif choice == '4':
-            break
-
-        cipher = Cipher()
-        if choice == '1':
-            cipher.encode()
-        elif choice == '2':
-            cipher.decode()
-        else:
-            cipher.hack()
-
-
+    
 if __name__ == '__main__':
     main()
