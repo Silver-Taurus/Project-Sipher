@@ -5,6 +5,13 @@
 import abc
 import math
 
+exceptions = {
+    '__caesar_cipher': 'Key cannot be < 1 or a multiple of 26', \
+    '__transposition_cipher': 'Key cannot be < 2 or >= the length of entered text', \
+    '__affine_cipher': 'Entered value is invalid', \
+    '__vigenere_cipher': 'Key should contain alphabets only and length of key should be <= length of text', \
+    }
+
 class CipherSubRoutine(abc.ABC):
     ''' Class for supporting the main cipher class by providing the sub-routines needed'''
 
@@ -12,11 +19,24 @@ class CipherSubRoutine(abc.ABC):
         self.__text = text
         self.__length = length
 
+    def safe_run(func):
+        ''' A decorator sub-routine for handling exceptions '''
+        def func_wrapper(*args, **kwargs):
+            while True:
+                try:
+                    return func(*args, **kwargs)
+                except KeyError:
+                    print('{}!!!\n'.format(exceptions['{}'.format(func.__code__.co_name)]))
+                else:
+                    break
+        return func_wrapper
+
     # Cipher Sub-Routines
     def _caesar_sub_routine(self, key):
         ''' Caesar Cipher sub-routine for crypting text '''
         # Adds the key to the character in the text
-        return ''.join(list(map(lambda char: chr((ord(char) - ord('a') + key) % 26 + ord('a')) if char.isalpha() else char, self.__text)))
+        return ''.join(list(map(lambda char: chr((ord(char) - ord('a') + key) % 26 + ord('a')) \
+            if char.isalpha() else char, self.__text)))
 
     def _transposition_sub_routine(self, key, mode):
         ''' Transposition Cipher sub-routine for crypting text '''
@@ -32,7 +52,8 @@ class CipherSubRoutine(abc.ABC):
         ''' Affine Cipher sub-routine for crypting text '''
         if mode == 'encode':
             # new_char = (a * char + b) % 26
-            return ''.join(list(map(lambda char: chr((key[0] * (ord(char) - ord('a')) + key[1]) % 26 + ord('a')) if char.isalpha() else char, self.__text)))
+            return ''.join(list(map(lambda char: chr((key[0] * (ord(char) - ord('a')) + key[1]) % 26 + ord('a')) \
+                if char.isalpha() else char, self.__text)))
             
         elif mode == 'decode':
             # new char = a^-1(char - b) % 26, where a^-1 is the modulus multiplicative inverse
@@ -41,13 +62,16 @@ class CipherSubRoutine(abc.ABC):
                 if ((key[0]*i) % 26) == 1 :
                     a_inv = i
                     break
-            return ''.join(list(map(lambda char: chr((a_inv * (ord(char) - ord('a') - key[1])) % 26 + ord('a')) if char.isalpha() else char, self.__text)))
+            return ''.join(list(map(lambda char: chr((a_inv * (ord(char) - ord('a') - key[1])) % 26 + ord('a')) \
+                if char.isalpha() else char, self.__text)))
             
     def _vigenere_sub_routine(self, keys, mode):
         ''' Vigenere Cipher sub-routine for crypting text '''
         if mode == 'encode':
             # new_char[i] = (char[i] + keys[i]) % 26
-            return ''.join(list(map(lambda char, key: chr((ord(char) + ord(key) - 2 * ord('a')) % 26 + ord('a')) if char.isalpha() else char , self.__text, keys)))
+            return ''.join(list(map(lambda char, key: chr((ord(char) + ord(key) - 2 * ord('a')) % 26 + ord('a')) \
+                if char.isalpha() else char , self.__text, keys)))
         else:
             # new_char[i] = (char[i] - keys[i] + 26) % 26
-            return ''.join(list(map(lambda char, key: chr((ord(char) - ord(key) + 26) % 26 + ord('a')) if char.isalpha() else char, self.__text, keys)))
+            return ''.join(list(map(lambda char, key: chr((ord(char) - ord(key) + 26) % 26 + ord('a')) \
+                if char.isalpha() else char, self.__text, keys)))
