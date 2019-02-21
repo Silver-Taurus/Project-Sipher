@@ -114,6 +114,7 @@ class Cipher(CipherSubRoutine):
     def __rsa_cipher(self, mode):
         pass
 
+    @CipherSubRoutine.safe_run
     def __primary_cipher_routine(self, mode):
         ''' primary cipher routine for applying the cipher algorithm with the defined mode leagally '''
         cipher_keys = {}
@@ -122,17 +123,10 @@ class Cipher(CipherSubRoutine):
             print('{}. {}'.format(num, func_name))
             cipher_keys['{}'.format(num)] = '{}'.format(func_name)
         choice = None
-        while(True):
-            try:
-                choice = input('\nEnter Your Choice: ')
-                print('\nThe {}d string is:'.format(mode), self.__ciphers[cipher_keys[choice]]() \
-                    if choice=='1' else self.__ciphers[cipher_keys[choice]](mode))
-                func = self.__ciphers[cipher_keys[choice]]
-            except KeyError:
-                print('Invalid Choice!!!\n')
-            else:
-                break
-
+        choice = input('\nEnter Your Choice: ')
+        print('\nThe {}d string is:'.format(mode), self.__ciphers[cipher_keys[choice]]() \
+            if choice=='1' else self.__ciphers[cipher_keys[choice]](mode))
+        
     def encode(self):
         ''' Encode-Routine for Encoding the plaintext into ciphertext '''
         self.__primary_cipher_routine('encode')

@@ -9,6 +9,7 @@ class CipherSubRoutine(abc.ABC):
     ''' Class for supporting the main cipher class by providing the sub-routines needed'''
 
     exceptions = {
+    '__primary_cipher_routine': 'Invalid Choice', \
     '__caesar_cipher': 'Key cannot be < 1 or a multiple of 26', \
     '__transposition_cipher': 'Key cannot be < 2 or >= the length of entered text', \
     '__affine_cipher': 'Entered value is invalid', \
@@ -25,10 +26,13 @@ class CipherSubRoutine(abc.ABC):
             while True:
                 try:
                     return func(*args, **kwargs)
-                except KeyError:
+                except KeyError or TypeError:
                     print('{}!!!\n'.format(CipherSubRoutine.exceptions['{}'.format(func.__code__.co_name)]))
                 except ValueError:
                     print('Invalid Literal!!!\n')
+                except Exception as e:
+                    print('Program crashed due to error: {}\n\n Returning to main menu...', e)
+                    return
                 else:
                     break
         return func_wrapper
