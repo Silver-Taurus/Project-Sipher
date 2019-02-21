@@ -18,7 +18,7 @@ class Cipher(CipherSubRoutine):
             'Vigenere Cipher': self.__vigenere_cipher, \
             'One Time Pad Cipher': self.__otp_cipher, \
             'RSA Cipher': self.__rsa_cipher
-            }   
+            }
         self.__text = input('\nEnter the text: ').lower()
         self.__length = len(self.__text)
         super().__init__(self.__text, self.__length)
@@ -63,9 +63,9 @@ class Cipher(CipherSubRoutine):
                             break
                     key_b = random.randint(1, 10**5)
                     break
-                
+
                 elif choice == 'm' or choice == 'M':
-                    n = int(input('Range 1 to n from which a valid key is choosen\nEnter n' 
+                    n = int(input('Range 1 to n from which a valid key is choosen\nEnter n'
                         '(should be greater than 1): '))
                     if n < 2:
                         raise KeyError
@@ -84,13 +84,13 @@ class Cipher(CipherSubRoutine):
 
                 else:
                     print('Invalid Choice!!!')
-        
+
             print('\nkey-a = {}\nkey-b = {}'.format(key_a, key_b))
-        
+
         else:
             key_a = int(input('\nEnter key-a: '))
             if key_a < 2 or math.gcd(key_a, 26) != 1:
-                raise KeyError            
+                raise KeyError
             key_b = int(input('Enter key-b: '))
             if key_b < 0:
                 raise KeyError
@@ -109,7 +109,8 @@ class Cipher(CipherSubRoutine):
         return self._vigenere_sub_routine(key, mode)
 
     def __otp_cipher(self, mode):
-        pass
+        ''' Cipher Routine to encode into or decode from One Time Pad Cipher '''
+        return self._otp_sub_routine(mode)
 
     def __rsa_cipher(self, mode):
         pass
@@ -126,7 +127,7 @@ class Cipher(CipherSubRoutine):
         choice = input('\nEnter Your Choice: ')
         print('\nThe {}d string is:'.format(mode), self.__ciphers[cipher_keys[choice]]() \
             if choice=='1' else self.__ciphers[cipher_keys[choice]](mode))
-        
+
     def encode(self):
         ''' Encode-Routine for Encoding the plaintext into ciphertext '''
         self.__primary_cipher_routine('encode')
@@ -184,9 +185,9 @@ _/        _/          _/_/    _/    _/_/_/    _/_/_/      _/_/
                 cipher.decode()
             else:
                 cipher.hack()
-        
+
         except KeyboardInterrupt:
             continue
-    
+
 if __name__ == '__main__':
     main()

@@ -4,6 +4,8 @@
 
 import abc
 import math
+from random import choice
+import string
 
 class CipherSubRoutine(abc.ABC):
     ''' Class for supporting the main cipher class by providing the sub-routines needed'''
@@ -60,17 +62,17 @@ class CipherSubRoutine(abc.ABC):
             # new_char = (a * char + b) % 26
             return ''.join(list(map(lambda char: chr((key[0] * (ord(char) - ord('a')) + key[1]) % 26 + ord('a')) \
                 if char.isalpha() else char, self.__text)))
-            
+
         elif mode == 'decode':
             # new char = a^-1(char - b) % 26, where a^-1 is the modulus multiplicative inverse
             a_inv = 0
-            for i in range(1, 26): 
+            for i in range(1, 26):
                 if ((key[0]*i) % 26) == 1 :
                     a_inv = i
                     break
             return ''.join(list(map(lambda char: chr((a_inv * (ord(char) - ord('a') - key[1])) % 26 + ord('a')) \
                 if char.isalpha() else char, self.__text)))
-            
+
     def _vigenere_sub_routine(self, keys, mode):
         ''' Vigenere Cipher sub-routine for crypting text '''
         if mode == 'encode':
@@ -81,3 +83,13 @@ class CipherSubRoutine(abc.ABC):
             # new_char[i] = (char[i] - keys[i] + 26) % 26
             return ''.join(list(map(lambda char, key: chr((ord(char) - ord(key) + 26) % 26 + ord('a')) \
                 if char.isalpha() else char, self.__text, keys)))
+
+    def _otp_sub_routine(self, mode):
+        ''' One Time Pad sub-routine for crypting text '''
+        if mode == 'encode':
+            key = "".join(choice(string.ascii_letters).lower() for _ in self.__text.replace(' ',''))
+            print('Encryption key is : ', key)
+            return "".join(chr((abs(ord(i) + ord(j)) % 26) + ord('a')) for (i, j) in zip(self.__text, key))
+        if mode == 'decode':
+            key = input('Enter key for decryption : ')
+            return "".join(chr(abs(ord(i) - ord(j)) + ord('a')) for (i,j) in zip(self.__text, key))
