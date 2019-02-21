@@ -5,15 +5,15 @@
 import abc
 import math
 
-exceptions = {
+class CipherSubRoutine(abc.ABC):
+    ''' Class for supporting the main cipher class by providing the sub-routines needed'''
+
+    exceptions = {
     '__caesar_cipher': 'Key cannot be < 1 or a multiple of 26', \
     '__transposition_cipher': 'Key cannot be < 2 or >= the length of entered text', \
     '__affine_cipher': 'Entered value is invalid', \
     '__vigenere_cipher': 'Key should contain alphabets only and length of key should be <= length of text', \
     }
-
-class CipherSubRoutine(abc.ABC):
-    ''' Class for supporting the main cipher class by providing the sub-routines needed'''
 
     def __init__(self, text, length):
         self.__text = text
@@ -26,7 +26,9 @@ class CipherSubRoutine(abc.ABC):
                 try:
                     return func(*args, **kwargs)
                 except KeyError:
-                    print('{}!!!\n'.format(exceptions['{}'.format(func.__code__.co_name)]))
+                    print('{}!!!\n'.format(CipherSubRoutine.exceptions['{}'.format(func.__code__.co_name)]))
+                except ValueError:
+                    print('Invalid Literal!!!\n')
                 else:
                     break
         return func_wrapper
