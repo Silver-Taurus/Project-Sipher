@@ -3,6 +3,7 @@
 ''' Project Sipher '''
 
 import math
+import string
 import random
 from cipher_sub_routines import CipherSubRoutine
 
@@ -108,9 +109,17 @@ class Cipher(CipherSubRoutine):
                 key.append(key[i % len(key)])
         return self._vigenere_sub_routine(key, mode)
 
+    @CipherSubRoutine.safe_run
     def __otp_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from One Time Pad Cipher '''
-        return self._otp_sub_routine(mode)
+        if mode == 'encode':
+            key = "".join(random.choice(string.ascii_letters).lower() for _ in self.__text)
+            print('Encryption key is:', key)
+        else:
+            key = input('Enter key for decryption : ')
+            if len(key) != self.__length or any(not ch.isalpha() for ch in key):
+                raise KeyError
+        return self._otp_vigenere_sub_routine(key, mode)
 
     def __rsa_cipher(self, mode):
         pass

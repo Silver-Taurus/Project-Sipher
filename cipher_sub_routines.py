@@ -16,6 +16,7 @@ class CipherSubRoutine(abc.ABC):
     '__transposition_cipher': 'Key cannot be < 2 or >= the length of entered text', \
     '__affine_cipher': 'Entered value is invalid', \
     '__vigenere_cipher': 'Key should contain alphabets only and length of key should be <= length of text', \
+    '__otp_cipher': 'Length of the key should be same as that of the text or Invalid literal', \
     }
 
     def __init__(self, text, length):
@@ -73,7 +74,7 @@ class CipherSubRoutine(abc.ABC):
             return ''.join(list(map(lambda char: chr((a_inv * (ord(char) - ord('a') - key[1])) % 26 + ord('a')) \
                 if char.isalpha() else char, self.__text)))
 
-    def _vigenere_sub_routine(self, keys, mode):
+    def _otp_vigenere_sub_routine(self, keys, mode):
         ''' Vigenere Cipher sub-routine for crypting text '''
         if mode == 'encode':
             # new_char[i] = (char[i] + keys[i]) % 26
@@ -84,12 +85,4 @@ class CipherSubRoutine(abc.ABC):
             return ''.join(list(map(lambda char, key: chr((ord(char) - ord(key) + 26) % 26 + ord('a')) \
                 if char.isalpha() else char, self.__text, keys)))
 
-    def _otp_sub_routine(self, mode):
-        ''' One Time Pad sub-routine for crypting text '''
-        if mode == 'encode':
-            key = "".join(choice(string.ascii_letters).lower() for _ in self.__text.replace(' ',''))
-            print('Encryption key is : ', key)
-            return "".join(chr((abs(ord(i) + ord(j)) % 26) + ord('a')) for (i, j) in zip(self.__text, key))
-        if mode == 'decode':
-            key = input('Enter key for decryption : ')
-            return "".join(chr(abs(ord(i) - ord(j)) + ord('a')) for (i,j) in zip(self.__text, key))
+    
