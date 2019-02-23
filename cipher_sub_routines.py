@@ -2,12 +2,12 @@
 
 ''' Python script containing Sub-Routines for different Ciphers '''
 
-import abc
+from abc import ABC
 import math
 from random import choice
 import string
 
-class CipherSubRoutine(abc.ABC):
+class CipherSubRoutine(ABC):
     ''' Class for supporting the main cipher class by providing the sub-routines needed'''
 
     exceptions = {
@@ -16,13 +16,13 @@ class CipherSubRoutine(abc.ABC):
     '__transposition_cipher': 'Key cannot be < 2 or >= the length of entered text', \
     '__affine_cipher': 'Entered value is invalid', \
     '__vigenere_cipher': 'Key should contain alphabets only and length of key should be <= length of text', \
-    '__otp_cipher': 'Length of the key should be same as that of the text or Invalid literal', \
+    '__otp_cipher': 'Key should contain alphabets only and length of key should be = length of text', \
     }
 
     def __init__(self, text, length):
         self.__text = text
         self.__length = length
-
+    
     def safe_run(func):
         ''' A decorator sub-routine for handling exceptions '''
         def func_wrapper(*args, **kwargs):
@@ -55,7 +55,15 @@ class CipherSubRoutine(abc.ABC):
         else:
             # Col-Wise reading and Row-Wise Filling of the text
             cols = math.ceil(self.__length/key)
-            return ''.join([self.__text[j] for i in range(cols) for j in range(i, self.__length, cols)])
+            shaded_boxes = cols*key - self.__length
+            output = ['']*cols
+            col,row = 0,0
+            for symbol in self.__text:
+                output[col] += symbol
+                col += 1
+                if (col == cols) or (col == cols-1 and row >= key - shaded_boxes):
+                    col,row = 0,row+1 
+            return ''.join(output)
 
     def _affine_sub_routine(self, key, mode):
         ''' Affine Cipher sub-routine for crypting text '''
@@ -74,7 +82,7 @@ class CipherSubRoutine(abc.ABC):
             return ''.join(list(map(lambda char: chr((a_inv * (ord(char) - ord('a') - key[1])) % 26 + ord('a')) \
                 if char.isalpha() else char, self.__text)))
 
-    def _otp_vigenere_sub_routine(self, keys, mode):
+    def _vigenere_otp_sub_routine(self, keys, mode):
         ''' Vigenere Cipher sub-routine for crypting text '''
         if mode == 'encode':
             # new_char[i] = (char[i] + keys[i]) % 26

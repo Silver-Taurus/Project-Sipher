@@ -9,6 +9,7 @@ from cipher_sub_routines import CipherSubRoutine
 
 class Cipher(CipherSubRoutine):
     ''' Class for performing the cipher methods on a given text '''
+
     # Cipher Constructor for taking input of text and passing it to CipherSubRoutine Constructor.
     def __init__(self):
         self.__ciphers = {
@@ -32,8 +33,8 @@ class Cipher(CipherSubRoutine):
     @CipherSubRoutine.safe_run
     def __caesar_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from Caesar Cipher '''
-        key = int(input('Enter the key: '))
-        if key < 0 or key == 0 or key%26 == 0:
+        key = int(input('(integer >0 and not a multiple of 26)\nEnter the key: '))
+        if key < 1 or key%26 == 0:
             raise KeyError
         if mode == 'encode':
             return self._caesar_sub_routine(key)
@@ -43,7 +44,7 @@ class Cipher(CipherSubRoutine):
     @CipherSubRoutine.safe_run
     def __transposition_cipher(self, mode):
         ''' Cipher Routine to encode into or decode form Transposition Cipher '''
-        key = int(input('Enter the key: '))
+        key = int(input('(integer >2 and < {})\nEnter the key: '.format(self.__length)))
         if (key < 2) or (key >= self.__length):
             raise KeyError
         return self._transposition_sub_routine(key, mode)
@@ -89,37 +90,49 @@ class Cipher(CipherSubRoutine):
             print('\nkey-a = {}\nkey-b = {}'.format(key_a, key_b))
 
         else:
-            key_a = int(input('\nEnter key-a: '))
+            key_a = int(input('\n(integer >1 and should be co-prime with 26)\nEnter the key-a: '))
             if key_a < 2 or math.gcd(key_a, 26) != 1:
                 raise KeyError
-            key_b = int(input('Enter key-b: '))
+            key_b = int(input('(positive integer)\nEnter the key-b: '))
             if key_b < 0:
                 raise KeyError
+    
         return self._affine_sub_routine((key_a, key_b), mode)
 
     @CipherSubRoutine.safe_run
     def __vigenere_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from Vigenere Cipher '''
-        key = input('Enter the key: ')
+        key = input('(alphabets only and length of key should be >0 and < {})\nEnter the key: '.format(self.__length))
         if any(char.isdigit() for char in key) or len(key) > self.__length:
             raise KeyError
         key = list(key)
         if self.__length != len(key):
             for i in range(self.__length - len(key)):
                 key.append(key[i % len(key)])
-        return self._vigenere_sub_routine(key, mode)
+        return self._vigenere_otp_sub_routine(key, mode)
 
     @CipherSubRoutine.safe_run
     def __otp_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from One Time Pad Cipher '''
         if mode == 'encode':
-            key = "".join(random.choice(string.ascii_letters).lower() for _ in self.__text)
-            print('Encryption key is:', key)
+            while True:
+                choice = input("Enter key Automatically/Manually [A/m]: ")
+                if choice == 'A' or choice == 'a' or choice == '':
+                    key = ''.join(random.choice(string.ascii_letters).lower() for _ in self.__text)
+                    print('Encryption key is:', key)
+                    break
+                elif choice == 'm' or choice == 'M':
+                    key = input('\n(alphabets only and length of key should be = {})\nEnter the key: '.format(self.__length))
+                    if len(key) != self.__length or any(not ch.isalpha() for ch in key):
+                        raise KeyError
+                    break
+                else:
+                    print('Invalid Choice!!!')   
         else:
-            key = input('Enter key for decryption : ')
+            key = input('(alphabets only and length of key should be = {})\nEnter the key: '.format(self.__length))
             if len(key) != self.__length or any(not ch.isalpha() for ch in key):
                 raise KeyError
-        return self._otp_vigenere_sub_routine(key, mode)
+        return self._vigenere_otp_sub_routine(key, mode)
 
     def __rsa_cipher(self, mode):
         pass
@@ -132,7 +145,7 @@ class Cipher(CipherSubRoutine):
         for num, func_name in enumerate(self.__ciphers.keys(), 1):
             print('{}. {}'.format(num, func_name))
             cipher_keys['{}'.format(num)] = '{}'.format(func_name)
-        choice = None
+     
         choice = input('\nEnter Your Choice: ')
         print('\nThe {}d string is:'.format(mode), self.__ciphers[cipher_keys[choice]]() \
             if choice=='1' else self.__ciphers[cipher_keys[choice]](mode))
@@ -148,6 +161,7 @@ class Cipher(CipherSubRoutine):
     def hack(self):
         ''' Hack-Routine for Hacking the ciphertext without key(s) into plaintext '''
         pass
+
 
 def main():
     ''' Main Driver Program '''
