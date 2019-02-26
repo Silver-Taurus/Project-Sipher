@@ -25,7 +25,7 @@ class Cipher(CipherSubRoutine):
         self.__length = len(self.__text)
         super().__init__(self.__text, self.__length)
 
-    # Primary Cipher Routines
+    #---------------------------- Primary Cipher Routines --------------------------------------
     def __reverse_cipher(self):
         ''' Cipher Routine to encode into or decode from Reverse Cipher '''
         return self.__text[::-1]

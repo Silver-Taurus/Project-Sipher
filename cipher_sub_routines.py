@@ -40,7 +40,7 @@ class CipherSubRoutine(ABC):
                     break
         return func_wrapper
 
-    # Cipher Sub-Routines
+    #------------------------------ Cipher Sub-Routines --------------------------------------------------
     def _caesar_sub_routine(self, key):
         ''' Caesar Cipher sub-routine for crypting text '''
         # Adds the key to the character in the text
