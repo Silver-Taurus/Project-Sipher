@@ -24,7 +24,6 @@ class Cipher(CipherSubRoutine):
             }
         self.__text = input('\nEnter the text: ').lower()
         self.__length = len(self.__text)
-        super().__init__(self.__text, self.__length)
 
     #---------------------------- Primary Cipher Routines --------------------------------------
     def __reverse_cipher(self):
@@ -157,9 +156,6 @@ class Cipher(CipherSubRoutine):
                    print(p, q)
 
 
-
-
-
     @CipherSubRoutine.safe_run
     def __primary_cipher_routine(self, mode):
         ''' primary cipher routine for applying the cipher algorithm with the defined mode leagally '''
@@ -167,11 +163,11 @@ class Cipher(CipherSubRoutine):
         print('\n\nCipher list:')
         for num, func_name in enumerate(self.__ciphers.keys(), 1):
             print('{}. {}'.format(num, func_name))
-            cipher_keys['{}'.format(num)] = '{}'.format(func_name)
+            cipher_keys[num] = func_name
 
-        choice = input('\nEnter Your Choice: ')
+        choice = int(input('\nEnter Your Choice: '))
         print('\nThe {}d string is:'.format(mode), self.__ciphers[cipher_keys[choice]]() \
-            if choice=='1' else self.__ciphers[cipher_keys[choice]](mode))
+            if choice == 1 else self.__ciphers[cipher_keys[choice]](mode))
 
     def encode(self):
         ''' Encode-Routine for Encoding the plaintext into ciphertext '''

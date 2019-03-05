@@ -19,10 +19,6 @@ class CipherSubRoutine(ABC):
     '__otp_cipher': 'Key should contain alphabets only and length of key should be = length of text', \
     }
 
-    def __init__(self, text, length):
-        self.__text = text
-        self.__length = length
-
     def safe_run(func):
         ''' A decorator sub-routine for handling exceptions '''
         def func_wrapper(*args, **kwargs):
