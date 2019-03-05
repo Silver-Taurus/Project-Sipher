@@ -5,6 +5,7 @@
 import math
 import string
 import random
+from Crypto.Util.number import isPrime
 from cipher_sub_routines import CipherSubRoutine
 
 class Cipher(CipherSubRoutine):
@@ -96,7 +97,7 @@ class Cipher(CipherSubRoutine):
             key_b = int(input('(positive integer)\nEnter the key-b: '))
             if key_b < 0:
                 raise KeyError
-    
+
         return self._affine_sub_routine((key_a, key_b), mode)
 
     @CipherSubRoutine.safe_run
@@ -116,18 +117,18 @@ class Cipher(CipherSubRoutine):
         ''' Cipher Routine to encode into or decode from One Time Pad Cipher '''
         if mode == 'encode':
             while True:
-                choice = input("Enter key Automatically/Manually [A/m]: ")
-                if choice == 'A' or choice == 'a' or choice == '':
+                choice = input('Enter key Automatically/Manually [A/m]: ')
+                if choice in ('A', 'a', ''):
                     key = ''.join(random.choice(string.ascii_letters).lower() for _ in self.__text)
                     print('Encryption key is:', key)
                     break
-                elif choice == 'm' or choice == 'M':
+                elif choice in ('M', 'm'):
                     key = input('\n(alphabets only and length of key should be = {})\nEnter the key: '.format(self.__length))
                     if len(key) != self.__length or any(not ch.isalpha() for ch in key):
                         raise KeyError
                     break
                 else:
-                    print('Invalid Choice!!!')   
+                    print('Invalid Choice!!!')
         else:
             key = input('(alphabets only and length of key should be = {})\nEnter the key: '.format(self.__length))
             if len(key) != self.__length or any(not ch.isalpha() for ch in key):
@@ -135,7 +136,29 @@ class Cipher(CipherSubRoutine):
         return self._vigenere_otp_sub_routine(key, mode)
 
     def __rsa_cipher(self, mode):
-        pass
+        ''' Cipher Routine to encode into or decode from RSA Cipher '''
+        if mode == 'encode':
+            while True:
+                choice = input('Enter key Automatically [A/m]: ')
+                if choice in ('A', 'a', ''):
+                   primes = [i for i in range(1000, 100000) if isPrime(i)]
+                   p = random.choice(primes)
+                   primes.remove(p)
+                   q = random.choice(primes)
+                   print('P = {} and Q = {}'.format(p, q))
+                   break
+
+                elif choice in ('M', 'm'):
+                   #print("Enter range min and max :")
+                   range_min, range_max = int(input("Enter min range :")), int(input("Enter max range :"))
+                   primes = [i for i in range(range_min, range_max) if isPrime(i)]
+                   print(primes)
+                   p,q = int(input("Enter p:")), int(input("Enter q:"))
+                   print(p, q)
+
+
+
+
 
     @CipherSubRoutine.safe_run
     def __primary_cipher_routine(self, mode):
@@ -145,7 +168,7 @@ class Cipher(CipherSubRoutine):
         for num, func_name in enumerate(self.__ciphers.keys(), 1):
             print('{}. {}'.format(num, func_name))
             cipher_keys['{}'.format(num)] = '{}'.format(func_name)
-     
+
         choice = input('\nEnter Your Choice: ')
         print('\nThe {}d string is:'.format(mode), self.__ciphers[cipher_keys[choice]]() \
             if choice=='1' else self.__ciphers[cipher_keys[choice]](mode))

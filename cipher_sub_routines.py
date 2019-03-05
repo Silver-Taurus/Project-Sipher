@@ -22,7 +22,7 @@ class CipherSubRoutine(ABC):
     def __init__(self, text, length):
         self.__text = text
         self.__length = length
-    
+
     def safe_run(func):
         ''' A decorator sub-routine for handling exceptions '''
         def func_wrapper(*args, **kwargs):
@@ -57,12 +57,12 @@ class CipherSubRoutine(ABC):
             cols = math.ceil(self.__length/key)
             shaded_boxes = cols*key - self.__length
             output = ['']*cols
-            col,row = 0,0
+            col = row = 0
             for symbol in self.__text:
                 output[col] += symbol
                 col += 1
                 if (col == cols) or (col == cols-1 and row >= key - shaded_boxes):
-                    col,row = 0,row+1 
+                    col,row = 0,row+1
             return ''.join(output)
 
     def _affine_sub_routine(self, key, mode):
@@ -92,5 +92,3 @@ class CipherSubRoutine(ABC):
             # new_char[i] = (char[i] - keys[i] + 26) % 26
             return ''.join(list(map(lambda char, key: chr((ord(char) - ord(key) + 26) % 26 + ord('a')) \
                 if char.isalpha() else char, self.__text, keys)))
-
-    
