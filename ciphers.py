@@ -134,6 +134,7 @@ class Cipher(CipherSubRoutine):
                 raise KeyError
         return self._vigenere_otp_sub_routine(key, mode)
 
+    @CipherSubRoutine.safe_run
     def __rsa_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from RSA Cipher '''
         if mode == 'encode':
@@ -154,11 +155,32 @@ class Cipher(CipherSubRoutine):
                    print(primes)
                    p,q = int(input("Enter p:")), int(input("Enter q:"))
                    print(p, q)
+                   break
+                else :
+                   break
+
+            n = p*q
+            phi = (p-1)*(q-1)
+            e = 2
+            while(e < phi):
+                if math.gcd(e, phi) == 1 :
+                    break
+                else :
+                    e += 1
+            return self._rsa_sub_routine(e, n, 'encode')
+
+        if mode == 'decode' :
+            p, q, e = int(input('Enter key public key p:')), int(input('Enter public key q:')), int(input('Enter e :'))
+            n = p*q
+            phi = (p-1)*(q-1)
+            d = (1 + (2*phi))/e
+            return self._rsa_sub_routine(d, n, 'decode')
+
 
 
     @CipherSubRoutine.safe_run
     def __primary_cipher_routine(self, mode):
-        ''' primary cipher routine for applying the cipher algorithm with the defined mode leagally '''
+        ''' primary cipher routine for applying the cipher algorithm with the defined mode legally '''
         cipher_keys = {}
         print('\n\nCipher list:')
         for num, func_name in enumerate(self.__ciphers.keys(), 1):

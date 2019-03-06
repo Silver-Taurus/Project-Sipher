@@ -88,3 +88,21 @@ class CipherSubRoutine(ABC):
             # new_char[i] = (char[i] - keys[i] + 26) % 26
             return ''.join(list(map(lambda char, key: chr((ord(char) - ord(key) + 26) % 26 + ord('a')) \
                 if char.isalpha() else char, self.__text, keys)))
+
+    def _rsa_sub_routine(self, x, n, mode) :
+        ''' Rsa Cipher Sub-Routine for crypting text '''
+        if mode == 'encode' :
+            output_string = ''
+            for _ in self.__text :
+                output_string.append(ord(_) - ord(a) + 1)
+            print ('Output string is : {} '.format(output_string))
+            encrypted_data = pow(int(output_string), x) % n
+            return string(encrypted_data
+
+        if mode == 'decode' :
+            encrypted_data = int(self.__text)
+            decrypted_data = string(pow(encrypted_data, x) % n)
+            output_string = ''
+            for _ in decrypted_data :
+                output_string.append(chr(int(_) + ord('a') - 1))
+            return output_string
