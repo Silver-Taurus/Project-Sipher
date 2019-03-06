@@ -24,6 +24,7 @@ class Cipher(CipherSubRoutine):
             }
         self.__text = input('\nEnter the text: ').lower()
         self.__length = len(self.__text)
+        super().__init__(self.__text, self.__length)
 
     #---------------------------- Primary Cipher Routines --------------------------------------
     def __reverse_cipher(self):

@@ -19,6 +19,10 @@ class CipherSubRoutine(ABC):
     '__otp_cipher': 'Key should contain alphabets only and length of key should be = length of text', \
     }
 
+    def __init__(self, text, length):
+        self.__text = text
+        self.__length = length
+
     def safe_run(func):
         ''' A decorator sub-routine for handling exceptions '''
         def func_wrapper(*args, **kwargs):
@@ -91,15 +95,15 @@ class CipherSubRoutine(ABC):
 
     def _rsa_sub_routine(self, x, n, mode) :
         ''' Rsa Cipher Sub-Routine for crypting text '''
-        if mode == 'encode' :
+        if mode == 'encode':
             output_string = ''
             for _ in self.__text :
                 output_string.append(ord(_) - ord(a) + 1)
             print ('Output string is : {} '.format(output_string))
             encrypted_data = pow(int(output_string), x) % n
-            return string(encrypted_data
+            return string(encrypted_data)
 
-        if mode == 'decode' :
+        else:
             encrypted_data = int(self.__text)
             decrypted_data = string(pow(encrypted_data, x) % n)
             output_string = ''
