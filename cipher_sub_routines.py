@@ -6,6 +6,7 @@ from abc import ABC
 import math
 from random import choice
 import string
+from collections import OrderedDict
 
 class CipherSubRoutine(ABC):
     ''' Class for supporting the main cipher class by providing the sub-routines needed'''
@@ -23,29 +24,12 @@ class CipherSubRoutine(ABC):
         self.__text = text
         self.__length = length
 
-    def safe_run(func):
-        ''' A decorator sub-routine for handling exceptions '''
-        def func_wrapper(*args, **kwargs):
-            while True:
-                try:
-                    return func(*args, **kwargs)
-                except KeyError or TypeError:
-                    print('{}!!!\n'.format(CipherSubRoutine.exceptions['{}'.format(func.__code__.co_name)]))
-                except ValueError:
-                    print('Invalid Literal!!!\n')
-                except Exception as e:
-                    print('Program crashed due to error: {}\n\n Returning to main menu...', e)
-                    return
-                else:
-                    break
-        return func_wrapper
-
     #------------------------------ Cipher Sub-Routines --------------------------------------------------
     def _caesar_sub_routine(self, key):
         ''' Caesar Cipher sub-routine for crypting text '''
         # Adds the key to the character in the text
         return ''.join(list(map(lambda char: chr((ord(char) - ord('a') + key) % 26 + ord('a')) \
-            if char.isalpha() else char, self.__text)))
+            if char.isalpha() else char, self._text)))
 
     def _transposition_sub_routine(self, key, mode):
         ''' Transposition Cipher sub-routine for crypting text '''
@@ -110,3 +94,26 @@ class CipherSubRoutine(ABC):
             for _ in decrypted_data :
                 output_string.append(chr(int(_) + ord('a') - 1))
             return output_string
+
+def single_cipher_dispatch(default_fn):
+    ''' Decorator for dispatching the cipher function corresponding to the cipher name injected '''
+    registry = OrderedDict()
+    registry['Default'] = default_fn
+
+    def decorated_function(cipher):
+        ''' cipher_func is decorated to give the desired function back '''
+        return registry.get(cipher, registry['Default'])
+    
+    def register(cipher):
+        ''' Decorator factory (or Parameterized Decorator) that will be a property of our decorated function,
+            in order to register any new cipher method made '''
+        def register_decorator(cipher_func):
+            ''' Register Decorator which adds the injected cipher to the registry and do not modify the cipher_func '''
+            registry[cipher] = cipher_func
+            return cipher_func
+        return register_decorator
+
+    
+    decorated_function.register = register
+    decorated_function.registry = registry
+    return decorated_function

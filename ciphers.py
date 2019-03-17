@@ -7,32 +7,87 @@ import string
 import random
 from Crypto.Util.number import isPrime
 from cipher_sub_routines import CipherSubRoutine
+from cipher_sub_routines import single_cipher_dispatch
+
+@single_cipher_dispatch
+def get_cipher_func(cipher):
+    return KeyError('No Such Cipher Exists!!!')
+
+def safe_run(func):
+    ''' A decorator sub-routine for handling exceptions '''
+    def func_wrapper(*args, **kwargs):
+        while True:
+            try:
+                return func(*args, **kwargs)
+            except KeyError or TypeError:
+                print('{}!!!\n'.format(CipherSubRoutine.exceptions[func.__name__]))
+            except ValueError:
+                print('Invalid Literal!!!\n')
+            else:
+                break
+    return func_wrapper
 
 class Cipher(CipherSubRoutine):
     ''' Class for performing the cipher methods on a given text '''
 
     # Cipher Constructor for taking input of text and passing it to CipherSubRoutine Constructor.
     def __init__(self):
-        self.__ciphers = {
-            'Reverse Cipher': self.__reverse_cipher, \
-            'Caesar Cipher': self.__caesar_cipher, \
-            'Transposition Cipher': self.__transposition_cipher, \
-            'Affine Cipher': self.__affine_cipher, \
-            'Vigenere Cipher': self.__vigenere_cipher, \
-            'One Time Pad Cipher': self.__otp_cipher, \
-            'RSA Cipher': self.__rsa_cipher
-            }
-        self.__text = input('\nEnter the text: ').lower()
-        self.__length = len(self.__text)
-        super().__init__(self.__text, self.__length)
+        self._text = input('\nEnter the text: ').lower()
+        self._length = len(self._text)
+        super().__init__(self._text, self._length)
+    
+    #---------------------------- Properties (Getters and Setters) --------------------------------
+    @property
+    def text(self):
+        return self._text
+    
+    @text.setter
+    def text(self, _):
+        print('\nWarning... Inititalised text is not meant to be changed manually!!!\n')
 
-    #---------------------------- Primary Cipher Routines --------------------------------------
-    def __reverse_cipher(self):
+    @property
+    def length(self):
+        return self._length
+
+    @length.setter
+    def length(self, _):
+        print('\nWarning... Internally Calculated length is not meant to be changed manually!!!\n')
+
+    #---------------------------- Main Methods ----------------------------------------------------
+    def _primary_cipher_routine(self, mode):
+        ''' primary cipher routine for applying the cipher algorithm with the defined mode legally '''
+        cipher_menu = {}
+        print('\n\nCipher list:')
+        for n, fn_name in enumerate(get_cipher_func.registry.keys(), 1):
+            if n != 1:
+                print(f'{n-1}. {fn_name}')
+                cipher_menu[n-1] = fn_name
+
+        choice = int(input('\nEnter Your Choice: '))
+        print('\nThe {}d string is:'.format(mode), get_cipher_func(cipher_menu[1])(self) if choice == 1 \
+            else get_cipher_func(cipher_menu[choice])(self, mode))
+
+    def encode(self):
+        ''' Encode-Routine for Encoding the plaintext into ciphertext '''
+        self._primary_cipher_routine('encode')
+
+    def decode(self):
+        ''' Decode-Routine for Decoding the ciphertext into plaintext '''
+        self._primary_cipher_routine('decode')
+
+    def hack(self):
+        ''' Hack-Routine for Hacking the ciphertext without key(s) into plaintext '''
+        pass
+
+    #---------------------------- Primary Cipher Routines -----------------------------------------
+    @get_cipher_func.register('Reverse Cipher')
+    def _reverse_cipher(self):
         ''' Cipher Routine to encode into or decode from Reverse Cipher '''
-        return self.__text[::-1]
+        return self.text[::-1]
 
-    @CipherSubRoutine.safe_run
-    def __caesar_cipher(self, mode):
+    @get_cipher_func.register('Caesar Cipher')
+    @safe_run
+    def _caesar_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from Caesar Cipher '''
         key = int(input('(integer >0 and not a multiple of 26)\nEnter the key: '))
         if key < 1 or key%26 == 0:
@@ -42,16 +97,18 @@ class Cipher(CipherSubRoutine):
         else:
             return self._caesar_sub_routine(26-key)
 
-    @CipherSubRoutine.safe_run
-    def __transposition_cipher(self, mode):
+    @get_cipher_func.register('Transposition Cipher')
+    @safe_run
+    def _transposition_cipher(self, mode):
         ''' Cipher Routine to encode into or decode form Transposition Cipher '''
-        key = int(input('(integer >2 and < {})\nEnter the key: '.format(self.__length)))
-        if (key < 2) or (key >= self.__length):
+        key = int(input('(integer >2 and < {})\nEnter the key: '.format(self.length)))
+        if (key < 2) or (key >= self.length):
             raise KeyError
         return self._transposition_sub_routine(key, mode)
 
-    @CipherSubRoutine.safe_run
-    def __affine_cipher(self, mode):
+    @get_cipher_func.register('Affine Cipher')
+    @safe_run
+    def _affine_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from Affine Cipher '''
         key_a = key_b = 0
 
@@ -100,43 +157,45 @@ class Cipher(CipherSubRoutine):
 
         return self._affine_sub_routine((key_a, key_b), mode)
 
-    @CipherSubRoutine.safe_run
-    def __vigenere_cipher(self, mode):
+    @get_cipher_func.register('Vignere Cipher')
+    @safe_run
+    def _vigenere_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from Vigenere Cipher '''
-        key = input('(alphabets only and length of key should be >0 and < {})\nEnter the key: '.format(self.__length))
-        if any(char.isdigit() for char in key) or len(key) > self.__length:
+        key = input('(alphabets only and length of key should be >0 and < {})\nEnter the key: '.format(self.length))
+        if any(char.isdigit() for char in key) or len(key) > self.length:
             raise KeyError
         key = list(key)
-        if self.__length != len(key):
-            for i in range(self.__length - len(key)):
+        if self._length != len(key):
+            for i in range(self.length - len(key)):
                 key.append(key[i % len(key)])
         return self._vigenere_otp_sub_routine(key, mode)
 
-    @CipherSubRoutine.safe_run
-    def __otp_cipher(self, mode):
+    @get_cipher_func.register('Otp Cipher')
+    @safe_run
+    def _otp_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from One Time Pad Cipher '''
         if mode == 'encode':
             while True:
                 choice = input('Enter key Automatically/Manually [A/m]: ')
                 if choice in ('A', 'a', ''):
-                    key = ''.join(random.choice(string.ascii_letters).lower() for _ in self.__text)
+                    key = ''.join(random.choice(string.ascii_letters).lower() for _ in self.text)
                     print('Encryption key is:', key)
                     break
                 elif choice in ('M', 'm'):
-                    key = input('\n(alphabets only and length of key should be = {})\nEnter the key: '.format(self.__length))
-                    if len(key) != self.__length or any(not ch.isalpha() for ch in key):
+                    key = input('\n(alphabets only and length of key should be = {})\nEnter the key: '.format(self.length))
+                    if len(key) != self.length or any(not ch.isalpha() for ch in key):
                         raise KeyError
                     break
                 else:
                     print('Invalid Choice!!!')
         else:
-            key = input('(alphabets only and length of key should be = {})\nEnter the key: '.format(self.__length))
-            if len(key) != self.__length or any(not ch.isalpha() for ch in key):
+            key = input('(alphabets only and length of key should be = {})\nEnter the key: '.format(self.length))
+            if len(key) != self.length or any(not ch.isalpha() for ch in key):
                 raise KeyError
         return self._vigenere_otp_sub_routine(key, mode)
 
-    @CipherSubRoutine.safe_run
-    def __rsa_cipher(self, mode):
+    @get_cipher_func.register('RSA Cipher')
+    def _rsa_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from RSA Cipher '''
         if mode == 'encode':
             while True:
@@ -176,34 +235,6 @@ class Cipher(CipherSubRoutine):
             phi = (p-1)*(q-1)
             d = (1 + (2*phi))/e
             return self._rsa_sub_routine(d, n, 'decode')
-
-
-
-    @CipherSubRoutine.safe_run
-    def __primary_cipher_routine(self, mode):
-        ''' primary cipher routine for applying the cipher algorithm with the defined mode legally '''
-        cipher_keys = {}
-        print('\n\nCipher list:')
-        for num, func_name in enumerate(self.__ciphers.keys(), 1):
-            print('{}. {}'.format(num, func_name))
-            cipher_keys[num] = func_name
-
-        choice = int(input('\nEnter Your Choice: '))
-        print('\nThe {}d string is:'.format(mode), self.__ciphers[cipher_keys[choice]]() \
-            if choice == 1 else self.__ciphers[cipher_keys[choice]](mode))
-
-    def encode(self):
-        ''' Encode-Routine for Encoding the plaintext into ciphertext '''
-        self.__primary_cipher_routine('encode')
-
-    def decode(self):
-        ''' Decode-Routine for Decoding the ciphertext into plaintext '''
-        self.__primary_cipher_routine('decode')
-
-    def hack(self):
-        ''' Hack-Routine for Hacking the ciphertext without key(s) into plaintext '''
-        pass
-
 
 def main():
     ''' Main Driver Program '''
