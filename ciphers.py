@@ -15,17 +15,17 @@ def get_cipher_func(cipher):
 
 def safe_run(func):
     ''' A decorator sub-routine for handling exceptions '''
-    def func_wrapper(*args, **kwargs):
+    def decorated_function(*args, **kwargs):
         while True:
             try:
                 return func(*args, **kwargs)
             except KeyError or TypeError:
-                print('{}!!!\n'.format(CipherSubRoutine.exceptions[func.__name__]))
+                print(f'{CipherSubRoutine.exceptions[func.__name__]}!!!\n')
             except ValueError:
                 print('Invalid Literal!!!\n')
             else:
                 break
-    return func_wrapper
+    return decorated_function
 
 class Cipher(CipherSubRoutine):
     ''' Class for performing the cipher methods on a given text '''
@@ -64,7 +64,7 @@ class Cipher(CipherSubRoutine):
                 cipher_menu[n-1] = fn_name
 
         choice = int(input('\nEnter Your Choice: '))
-        print('\nThe {}d string is:'.format(mode), get_cipher_func(cipher_menu[1])(self) if choice == 1 \
+        print(f'\nThe {mode}d string is:', get_cipher_func(cipher_menu[1])(self) if choice == 1 \
             else get_cipher_func(cipher_menu[choice])(self, mode))
 
     def encode(self):
@@ -101,7 +101,7 @@ class Cipher(CipherSubRoutine):
     @safe_run
     def _transposition_cipher(self, mode):
         ''' Cipher Routine to encode into or decode form Transposition Cipher '''
-        key = int(input('(integer >2 and < {})\nEnter the key: '.format(self.length)))
+        key = int(input(f'(integer >2 and < {self.length})\nEnter the key: '))
         if (key < 2) or (key >= self.length):
             raise KeyError
         return self._transposition_sub_routine(key, mode)
@@ -145,7 +145,7 @@ class Cipher(CipherSubRoutine):
                 else:
                     print('Invalid Choice!!!')
 
-            print('\nkey-a = {}\nkey-b = {}'.format(key_a, key_b))
+            print(f'\nkey-a = {key_a}\nkey-b = {key_b}')
 
         else:
             key_a = int(input('\n(integer >1 and should be co-prime with 26)\nEnter the key-a: '))
@@ -161,7 +161,7 @@ class Cipher(CipherSubRoutine):
     @safe_run
     def _vigenere_cipher(self, mode):
         ''' Cipher Routine to encode into or decode from Vigenere Cipher '''
-        key = input('(alphabets only and length of key should be >0 and < {})\nEnter the key: '.format(self.length))
+        key = input(f'(alphabets only and length of key should be >0 and <{self.length})\nEnter the key: ')
         if any(char.isdigit() for char in key) or len(key) > self.length:
             raise KeyError
         key = list(key)
@@ -182,14 +182,14 @@ class Cipher(CipherSubRoutine):
                     print('Encryption key is:', key)
                     break
                 elif choice in ('M', 'm'):
-                    key = input('\n(alphabets only and length of key should be = {})\nEnter the key: '.format(self.length))
+                    key = input(f'\n(alphabets only and length of key should be = {self.length})\nEnter the key: ')
                     if len(key) != self.length or any(not ch.isalpha() for ch in key):
                         raise KeyError
                     break
                 else:
                     print('Invalid Choice!!!')
         else:
-            key = input('(alphabets only and length of key should be = {})\nEnter the key: '.format(self.length))
+            key = input(f'(alphabets only and length of key should be = {self.length})\nEnter the key: ')
             if len(key) != self.length or any(not ch.isalpha() for ch in key):
                 raise KeyError
         return self._vigenere_otp_sub_routine(key, mode)
